@@ -1,0 +1,73 @@
+#Jhyg Castillejos
+#2023-11-16
+
+"""
+For the 'vending_machine_graphical.py' script - WORKS
+"""
+from vending_machine_JC   import VendingMachine, WaitingState, AddCoinsState, DeliverProductState, CountChangeState
+
+def test_VendingMachine():
+    
+    # new machine object
+    vending = VendingMachine()
+
+    # Add the states - ORG
+    # vending.add_state(WaitingState())
+    # vending.add_state(CoinsState())
+    # vending.add_state(DispenseState())
+    # vending.add_state(ChangeState())
+
+    # My revisions
+    vending.add_state(WaitingState())
+    vending.add_state(AddCoinsState())
+    vending.add_state(DeliverProductState())
+    vending.add_state(CountChangeState())
+
+    # Reset state is "waiting for first coin"
+
+    vending.go_to_state('waiting')
+    assert vending.state.name == 'waiting'
+
+    # test that the first coin causes a transition to 'coins'
+    vending.event = '2 dollars' # a twonie
+    vending.update()
+    assert vending.state.name == 'add_coins'
+    assert vending.amount == 200 # pennies, was .total
+    
+    vending.event = '5 cents' 
+    vending.update()
+    assert vending.state.name == 'add_coins'
+    assert vending.amount == 205
+
+def button_action(self):
+    self.event = 'RETURN'
+    self.update()
+    
+
+def test_CountChangeState():
+    vending = VendingMachine()
+    vending.add_state(CountChangeState())
+    vending.go_to_state('count_change')
+    assert vending.state.name == 'count_change'
+    vending.change_due = 0
+
+def test_DeliverProductState():
+    vending = VendingMachine()
+    
+    vending.add_state(WaitingState())
+    vending.add_state(AddCoinsState())
+    vending.add_state(DeliverProductState())
+    vending.add_state(CountChangeState())
+    
+    vending.go_to_state('add_coins')
+    assert vending.state.name == 'add_coins'
+    
+    
+    vending.event = '25 cents'  
+    vending.update()
+    assert vending.state.name == 'add_coins'
+    assert vending.amount == 25
+    
+    vending.event = 'chips'
+    vending.update()
+    assert vending.state.name == 'waiting'
